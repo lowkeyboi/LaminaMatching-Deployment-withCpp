@@ -25,7 +25,6 @@ int main() {
     vector<vector<Point>> pair;
     pair = my_model.predict(image);
     imshow("test", image);
-    waitKey(1);
-    system("pause");
+    waitKey(0);
     return 0;
 }
