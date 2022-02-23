@@ -10,11 +10,13 @@ using namespace std;
 using namespace cv;
 using namespace InferenceEngine;
 
-class LaminaMachByDL {
+class LaminaMatchByDL {
 public:
-    LaminaMachByDL(std::string IR_xml, std::string IR_bin);
+    LaminaMatchByDL(std::string IR_xml, std::string IR_bin);
     void initiateModel(std::string IR_xml, std::string IR_bin, InferenceEngine::CNNNetwork& model, InferenceEngine::InferRequest& infer_request);
     vector<vector<Point>> predict(cv::Mat& image);
+
+
        
 private:
     void PAF_finetune(vector<vector<double>>& PAF_x, vector<vector<double>>& PAF_y, Mat& PAF);
@@ -26,4 +28,7 @@ private:
     InferRequest infer_request;
     InferenceEngine::ExecutableNetwork  executable_network;
     InferenceEngine::Core ie;
+
+    Mat PAF_global;
+    
 };

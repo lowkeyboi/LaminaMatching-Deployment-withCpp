@@ -1,11 +1,11 @@
 
 #include "LaminaMatchByDL.h"
 
-LaminaMachByDL::LaminaMachByDL(std::string IR_xml, std::string IR_bin) {
+LaminaMatchByDL::LaminaMatchByDL(std::string IR_xml, std::string IR_bin) {
 	this->initiateModel(IR_xml, IR_bin, this->model, this->infer_request);
 }
 
-void LaminaMachByDL::initiateModel(std::string xmlPath, std::string binPath, InferenceEngine::CNNNetwork& model, InferenceEngine::InferRequest& infer_request){
+void LaminaMatchByDL::initiateModel(std::string xmlPath, std::string binPath, InferenceEngine::CNNNetwork& model, InferenceEngine::InferRequest& infer_request){
 
     model = this->ie.ReadNetwork(xmlPath, binPath);
     //prepare input blobs
@@ -35,7 +35,7 @@ void LaminaMachByDL::initiateModel(std::string xmlPath, std::string binPath, Inf
 
 }
 
-vector<vector<Point>> LaminaMachByDL::predict(cv::Mat& image) {
+vector<vector<Point>> LaminaMatchByDL::predict(cv::Mat& image) {
     int ori_height = image.rows;
     int ori_width = image.cols;
     resize(image, image, Size(128, 512));
@@ -140,6 +140,7 @@ vector<vector<Point>> LaminaMachByDL::predict(cv::Mat& image) {
     vector<vector<double>> PAF_MAP_X(512, w), PAF_MAP_Y(512, w);
 
     this->PAF_finetune(PAF_MAP_X, PAF_MAP_Y, PAF_vector_size);
+    this->PAF_global = PAF_vector_size;
 
     vector<Point> pairs_point_idx;
     vector<vector<Point>> pair;
@@ -165,10 +166,16 @@ vector<vector<Point>> LaminaMachByDL::predict(cv::Mat& image) {
         line(image, pair[i][0], pair[i][1], Scalar(255));
     }
 
+    imshow("PAF_global",this->PAF_global);
+    waitKey(0);
+
+    imshow("image", image);
+    waitKey(0);
+
     return pair;
 }
 
-void LaminaMachByDL::PAF_finetune(vector<vector<double>>& PAF_x, vector<vector<double>>& PAF_y, Mat& PAF) {
+void LaminaMatchByDL::PAF_finetune(vector<vector<double>>& PAF_x, vector<vector<double>>& PAF_y, Mat& PAF) {
 
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
@@ -258,7 +265,7 @@ void LaminaMachByDL::PAF_finetune(vector<vector<double>>& PAF_x, vector<vector<d
 
 }
 
-void LaminaMachByDL::Get_all_points(Mat PCM_LEFT, Mat PCM_RIGHT, vector<Point>& points_left, vector<Point>& points_right, int ori_width, int ori_height) {
+void LaminaMatchByDL::Get_all_points(Mat PCM_LEFT, Mat PCM_RIGHT, vector<Point>& points_left, vector<Point>& points_right, int ori_width, int ori_height) {
     vector<vector<Point>> LEFT_contours, RIGHT_contours;
     vector<Vec4i> LEFT_hierarchy, RIGHT_hierarchy;
     findContours(PCM_LEFT, LEFT_contours, LEFT_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point());
@@ -299,7 +306,7 @@ void LaminaMachByDL::Get_all_points(Mat PCM_LEFT, Mat PCM_RIGHT, vector<Point>& 
     }
 }
 
-vector<Point> LaminaMachByDL::Get_pairs_idx(vector<Point>& points_left,
+vector<Point> LaminaMatchByDL::Get_pairs_idx(vector<Point>& points_left,
     vector<Point>& points_right,
     vector<vector<double>>& PAF_MAP_X,
     vector<vector<double>>& PAF_MAP_Y) {
